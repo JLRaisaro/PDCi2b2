@@ -29,6 +29,6 @@ PDCi2b2 is licensed under a End User Software License Agreement ('EULA') for non
 ## Contact
 You can contact any of the developers for more information:
 
-* [Jean Louis Raisaro](https://github.com/JLRgithub) (PHD student) - jean.raisaro@epfl.ch
-* [Joao Andre Sa](https://github.com/JoaoAndreSa) (Software Engineer) - joao.gomesdesaesousa@epfl.ch
+* [Jean Louis Raisaro](https://github.com/JLRgithub) (PHD student at EPFL) - jean.raisaro@epfl.ch
+* [Joao Andre Sa](https://github.com/JoaoAndreSa) (Software Engineer at EPFL) - joao.gomesdesaesousa@epfl.ch
 * [Jeffrey Klann](https://github.com/jklann) (Assistant Professor at HMS) - Jeff.Klann@mgh.harvard.edu
