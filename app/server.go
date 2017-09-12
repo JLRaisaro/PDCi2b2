@@ -5,8 +5,8 @@ import (
 
 	// Empty imports to have the init-functions called which should
 	// register the protocol
-	_ "github.com/JLRgithub/PrivateI2B2DQ/protocols"
-	_ "github.com/JLRgithub/PrivateI2B2DQ/services"
+	_ "github.com/JLRgithub/PrivateDCi2b2/protocols"
+	_ "github.com/JLRgithub/PrivateDCi2b2/services"
 	"gopkg.in/dedis/onet.v1/app"
 )
 

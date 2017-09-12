@@ -11,15 +11,16 @@ package protocols
 import (
 	"errors"
 
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
-	"gopkg.in/dedis/crypto.v0/abstract"
-	"gopkg.in/dedis/onet.v1"
-	"gopkg.in/dedis/onet.v1/log"
-	"gopkg.in/dedis/onet.v1/network"
 	"reflect"
 	"sync"
 	"time"
 	"unsafe"
+
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
+	"gopkg.in/dedis/crypto.v0/abstract"
+	"gopkg.in/dedis/onet.v1"
+	"gopkg.in/dedis/onet.v1/log"
+	"gopkg.in/dedis/onet.v1/network"
 )
 
 // DeterministicTaggingProtocolName is the registered name for the deterministic tagging protocol.

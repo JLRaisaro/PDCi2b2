@@ -9,11 +9,12 @@ package protocols
 import (
 	"errors"
 
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
+	"sync"
+
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
 	"gopkg.in/dedis/onet.v1"
 	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/dedis/onet.v1/network"
-	"sync"
 )
 
 // CollectiveAggregationProtocolName is the registered name for the collective aggregation protocol.

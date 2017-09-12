@@ -1,12 +1,13 @@
 package lib_test
 
 import (
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
+	"strconv"
+	"testing"
+
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/dedis/crypto.v0/random"
 	"gopkg.in/dedis/onet.v1/network"
-	"strconv"
-	"testing"
 )
 
 // TestStoring tests survey store and its methods.

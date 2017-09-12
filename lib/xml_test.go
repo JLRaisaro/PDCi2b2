@@ -3,9 +3,10 @@ package lib_test
 import (
 	"testing"
 
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
 
 	"encoding/xml"
+
 	"github.com/stretchr/testify/assert"
 )
 

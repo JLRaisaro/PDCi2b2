@@ -1,11 +1,12 @@
 package lib_test
 
 import (
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
+	"testing"
+
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/dedis/onet.v1/network"
-	"testing"
 )
 
 func TestShuffleSequence(t *testing.T) {

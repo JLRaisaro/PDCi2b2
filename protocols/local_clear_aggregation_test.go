@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
-	"github.com/JLRgithub/PrivateI2B2DQ/protocols"
-	"github.com/JLRgithub/PrivateI2B2DQ/services/data"
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
+	"github.com/JLRgithub/PrivateDCi2b2/protocols"
+	"github.com/JLRgithub/PrivateDCi2b2/services/data"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/dedis/onet.v1"
 	"gopkg.in/dedis/onet.v1/network"

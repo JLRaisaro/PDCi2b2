@@ -4,14 +4,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
-	"github.com/JLRgithub/PrivateI2B2DQ/protocols"
+	"strconv"
+
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
+	"github.com/JLRgithub/PrivateDCi2b2/protocols"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/dedis/crypto.v0/random"
 	"gopkg.in/dedis/onet.v1"
 	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/dedis/onet.v1/network"
-	"strconv"
 )
 
 func TestAddRmServer(t *testing.T) {

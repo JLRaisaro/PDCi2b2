@@ -11,8 +11,8 @@ import (
 
 	"time"
 
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
-	"github.com/JLRgithub/PrivateI2B2DQ/services/i2b2dc"
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
+	"github.com/JLRgithub/PrivateDCi2b2/services"
 	"github.com/btcsuite/goleveldb/leveldb/errors"
 	"gopkg.in/dedis/onet.v1"
 	"gopkg.in/dedis/onet.v1/app"

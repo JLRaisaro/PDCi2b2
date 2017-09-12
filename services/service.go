@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
-	"github.com/JLRgithub/PrivateI2B2DQ/protocols"
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
+	"github.com/JLRgithub/PrivateDCi2b2/protocols"
 	"github.com/btcsuite/goleveldb/leveldb/errors"
 	_ "github.com/lib/pq"
 	"github.com/satori/go.uuid"

@@ -1,9 +1,10 @@
 package lib_test
 
 import (
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestAddRmProof tests the generation of the noise values for the differential privacy

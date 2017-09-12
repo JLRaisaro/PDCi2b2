@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
 	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/urfave/cli.v1"
 )

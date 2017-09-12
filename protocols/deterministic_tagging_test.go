@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
-	"github.com/JLRgithub/PrivateI2B2DQ/protocols"
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
+	"github.com/JLRgithub/PrivateDCi2b2/protocols"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/dedis/crypto.v0/random"
 	"gopkg.in/dedis/onet.v1"

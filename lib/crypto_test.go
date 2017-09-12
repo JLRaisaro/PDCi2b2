@@ -1,13 +1,14 @@
 package lib_test
 
 import (
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
+	"reflect"
+	"testing"
+
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/dedis/crypto.v0/abstract"
 	"gopkg.in/dedis/crypto.v0/random"
 	"gopkg.in/dedis/onet.v1/network"
-	"reflect"
-	"testing"
 )
 
 var suite = network.Suite

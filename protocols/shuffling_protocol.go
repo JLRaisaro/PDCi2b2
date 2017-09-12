@@ -9,13 +9,14 @@ package protocols
 import (
 	"errors"
 
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
+	"sync"
+	"time"
+
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
 	"gopkg.in/dedis/crypto.v0/abstract"
 	"gopkg.in/dedis/onet.v1"
 	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/dedis/onet.v1/network"
-	"sync"
-	"time"
 )
 
 // ShufflingProtocolName is the registered name for the neff shuffle protocol.

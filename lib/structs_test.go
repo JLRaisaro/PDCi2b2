@@ -1,10 +1,11 @@
 package lib_test
 
 import (
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
+	"testing"
+
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/dedis/crypto.v0/abstract"
-	"testing"
 )
 
 // TestAddClientResponse tests the addition of two client response objects

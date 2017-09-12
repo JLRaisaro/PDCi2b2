@@ -22,7 +22,7 @@ main(){
 
 #------- BUILD --------#
 testBuild(){
-    testOK dbgRun ./i2b2dc --help
+    testOK dbgRun ./app --help
 }
 
 build(){
@@ -32,14 +32,14 @@ build(){
         DIR=$(mktemp -d)
     fi
 
-    rm -f $DIR/i2b2dc #to force compilation
+    rm -f $DIR/app #to force compilation
 
     mkdir -p $DIR
     cd $DIR
     echo "Building in $DIR"
 
     if [ ! -x i2b2dc ]; then
-        go build -o i2b2dc -a $BUILDDIR/*go
+        go build -o app -a $BUILDDIR/*go
     fi
 
 }
@@ -49,7 +49,7 @@ build(){
 testServerCfg(){
     for ((n=1; n <= 2*2; n+=2)) do
         runSrvCfg $n
-        pkill -9 i2b2dc
+        pkill -9 app
         testFile srv$n/private.toml
     done
 }
@@ -83,7 +83,7 @@ setupServers(){
 
 runSrv(){
     cd srv$1
-    ../i2b2dc -d $DBG_SRV server -c private.toml
+    ../app -d $DBG_SRV server -c private.toml
     cd ..
 }
 
@@ -91,7 +91,7 @@ runCl(){
     G=group.toml
     shift
     echo "Running Client with $G $@"
-    ./i2b2dc -d $DBG_CLIENT $@ -f $G -c "ICD10:E08.52,ICD10:E08.59" -t "2015"  -g "location_cd"
+    ./app -d $DBG_CLIENT $@ -f $G -c "ICD10:E08.52,ICD10:E08.59" -t "2015"  -g "location_cd"
 }
 
 

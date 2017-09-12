@@ -4,7 +4,7 @@
 package protocols
 
 import (
-	"github.com/JLRgithub/PrivateI2B2DQ/lib"
+	"github.com/JLRgithub/PrivateDCi2b2/lib"
 	"gopkg.in/dedis/crypto.v0/abstract"
 	"gopkg.in/dedis/onet.v1"
 	"gopkg.in/dedis/onet.v1/log"
