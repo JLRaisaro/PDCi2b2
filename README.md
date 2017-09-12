@@ -8,7 +8,7 @@ PDCi2b2 is developed by LCA1 (Laboratory for Communications and Applications in 
 * PDCi2b2 does an intensive use of [Overlay-network (ONet) library](https://github.com/dedis/onet)
 * For more information regarding the underlying architecture please refer to the stable version of ONet `gopkg.in/dedis/onet.v1`
 * To check the code organisation, have a look at [Layout](https://github.com/lca1/unlynx/wiki/Layout)
-* For more information on how to run PDCi2b2, simulations and apps, go to [Running UnLynx](https://github.com/lca1/unlynx/wiki/Running-UnLynx)
+* For more information on how to run PDCi2b2, simulations and apps, go to [Running UnLynx](https://github.com/JLRgithub/PrivateDCi2b2/wiki/Running-PDCi2b2)
 
 ## Getting Started
 
