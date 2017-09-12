@@ -2,13 +2,14 @@ package main
 
 import (
 	"errors"
+	"io"
+	"io/ioutil"
+	"os"
+	"strconv"
+
 	"github.com/JLRgithub/PrivateI2B2DQ/lib"
 	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/urfave/cli.v1"
-	"io"
-	"os"
-	"strconv"
-	"io/ioutil"
 )
 
 func decryptIntFromApp(c *cli.Context) error {

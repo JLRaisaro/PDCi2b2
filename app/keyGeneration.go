@@ -2,11 +2,12 @@ package main
 
 import (
 	"errors"
+	"io"
+	"os"
+
 	"github.com/JLRgithub/PrivateI2B2DQ/lib"
 	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/urfave/cli.v1"
-	"io"
-	"os"
 )
 
 func keyGenerationFromApp(c *cli.Context) error {
