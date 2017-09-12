@@ -1,0 +1,6 @@
+# This file contains your private key.
+# Do not give it away lightly!
+Public = "53d5d919d8a291216abe45bc70a072e4546b1e9534d3011c7bb569007a74e2a8"
+Private = "859a732ec19275c5fadfa5485c0e990d1402aecf38c8b16fd53619b2f5dde402"
+Address = "tcp://127.0.0.1:2003"
+Description = "i2b2dc proxy"

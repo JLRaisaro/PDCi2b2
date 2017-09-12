@@ -1,0 +1,4 @@
+[[servers]]
+  Address = "tcp://127.0.0.1:2003"
+  Public = "U9XZGdiikSFqvkW8cKBy5FRrHpU00wEce7VpAHp04qg="
+  Description = "i2b2dc proxy"

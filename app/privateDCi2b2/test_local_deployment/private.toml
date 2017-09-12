@@ -1,0 +1,6 @@
+# This file contains your private key.
+# Do not give it away lightly!
+Public = "ff8df201188776dddcc35022106b026215b022314979ef72e418e4216728f452"
+Private = "d51c12de2dcbcac582d4cefe3cc0f8d936f8e3ff6f23def3b80da5972c5d810a"
+Address = "tcp://127.0.0.1:7896"
+Description = "test_cloud"

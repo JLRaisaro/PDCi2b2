@@ -1,0 +1,6 @@
+# This file contains your private key.
+# Do not give it away lightly!
+Public = "ae4e0e3415961966b49575dce30ade3d313205b4979f2c6a9c7ae00dcb6c9d16"
+Private = "bd1691da337a16a608a065714577b5c77a98f38abfc6f3e3f79a0cae055ea00a"
+Address = "tcp://127.0.0.1:2001"
+Description = "i2b2dc storage provider"

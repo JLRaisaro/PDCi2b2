@@ -1,0 +1,4 @@
+[[servers]]
+  Address = "tcp://127.0.0.1:2001"
+  Public = "rk4ONBWWGWa0lXXc4wrePTEyBbSXnyxqnHrgDctsnRY="
+  Description = "i2b2dc storage provider"
