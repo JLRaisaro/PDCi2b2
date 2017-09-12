@@ -1,5 +1,5 @@
 # PDCi2b2 
-PDCi2b2 (Private Data Characterization for i2b2 data) is a client-server platform for the privacy-preserving sharing of aggregate-level i2b2 data. PDCi2b2 is based on additively homomorphic encryption and proxy re-encryption. Its goal is to make clinical sites more comfortable with sharing data in an untrusted public cloud, such as AWS or Google Cloud, by providing strong end-to-end confidentiality protection. With PDCi2b2, data in the cloud are protected against a honest-but-curious adversary not aonly at rest and in transit but also during computations.
+PDCi2b2 (Private Data Characterization for i2b2) is a client-server platform for the privacy-preserving sharing of aggregate-level i2b2 data. PDCi2b2 is based on additively homomorphic encryption and proxy re-encryption. Its goal is to make clinical sites more comfortable with sharing data in an untrusted public cloud, such as AWS or Google Cloud, by providing strong end-to-end confidentiality protection. With PDCi2b2, data in the cloud are protected against a honest-but-curious adversary not aonly at rest and in transit but also during computations.
 
 PDCi2b2 is developed by LCA1 (Laboratory for Communications and Applications in EPFL) in collaboration with the ARCH team at HMS (Harvard Medical School).  
 
