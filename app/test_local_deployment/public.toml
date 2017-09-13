@@ -1,4 +1,0 @@
-[[servers]]
-  Address = "tcp://127.0.0.1:7896"
-  Public = "/43yARiHdt3cw1AiEGsCYhWwIjFJee9y5BjkIWco9FI="
-  Description = "test_cloud"

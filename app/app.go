@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	// BinaryName is the name of the unlynx app
-	BinaryName = "i2b2dc"
+	// BinaryName is the name of the PDCi2b2 app
+	BinaryName = "PDCi2b2"
 
 	// Version of the binary
 	Version = "1.00"
@@ -63,7 +63,7 @@ const (
 func main() {
 	cliApp := cli.NewApp()
 	cliApp.Name = BinaryName
-	cliApp.Usage = "Query i2b2 summary data stored on the cloud in the i2b2 data model under homomorphic encryption"
+	cliApp.Usage = "Query aggregate-level i2b2 data stored in the cloud with ElGamal homomorphic encryption"
 	cliApp.Version = Version
 
 	binaryFlags := []cli.Flag{
@@ -143,7 +143,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  optionGroupBy + ", " + optionGroupByShort,
-			Usage: "Specify the attributes in the SQL-GROUPBY clause. Possible values: 'lcoation_cd', 'concept_cd', 'year'",
+			Usage: "Specify the attributes in the SQL-GROUPBY clause. Possible values: 'location_cd', 'concept_cd', 'time'",
 		},
 		cli.StringFlag{
 			Name:  optionCsvFileOut + ", " + optionCsvFileOutShort,
