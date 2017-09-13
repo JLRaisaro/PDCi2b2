@@ -9,6 +9,12 @@ PDCi2b2 is developed by LCA1 (Laboratory for Communications and Applications in 
 * For more information regarding the underlying architecture please refer to the stable version of ONet `gopkg.in/dedis/onet.v1`
 * For more information on how to run PDCi2b2, go to [Running PDCi2b2](https://github.com/JLRgithub/PDCi2b2/wiki/Running-PDCi2b2)
 
+## Disclaimer
+
+The software in this repository is highly experimental and under heavy development. Do not use it for anything security-critical yet.
+
+**All usage is at your own risk!**
+
 ## Getting Started
 
 To use the code of this repository you need to:
