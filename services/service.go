@@ -2,9 +2,8 @@ package serviceI2B2dc
 
 import (
 	"database/sql"
-
+	"strings"
 	"time"
-
 	"github.com/BurntSushi/toml"
 	"github.com/JLRgithub/PrivateDCi2b2/lib"
 	"github.com/JLRgithub/PrivateDCi2b2/protocols"
@@ -153,7 +152,7 @@ func (s *Service) HandleResultsQueryDC(resq *ResultsQueryDC) (network.Message, o
 
 	s.Query.ClientPubKey = resq.ClientPublic
 
-	s.StartService(resq.QueryID, true)
+	s.StartService(resq.QueryID, true, false)
 
 	log.Lvl1(s.ServerIdentity(), " sends result back to the client")
 
@@ -217,7 +216,7 @@ func (s *Service) StartProtocol(name string) (onet.ProtocolInstance, error) {
 //______________________________________________________________________________________________________________________
 
 // StartService starts the service (with all its different steps/protocols)
-func (s *Service) StartService(targetQuery QueryID, root bool) error {
+func (s *Service) StartService(targetQuery QueryID, root bool, exactPath bool) error {
 
 	log.Lvl1(s.ServerIdentity(), " starts  Protocol for query ", targetQuery)
 
@@ -227,7 +226,7 @@ func (s *Service) StartService(targetQuery QueryID, root bool) error {
 	}
 
 	//prepare SQL query statement
-	queryStmt := s.PrepareQueryStatement()
+	queryStmt := s.PrepareQueryStatement(exactPath)
 
 	//execute query to DB along with aggregation
 	start0 := time.Now()
@@ -327,7 +326,7 @@ func (s *Service) ExecuteSqlQuery(query *string) (*map[string][]string, *lib.Cip
 		}
 		resultSet["location_cd"] = append(resultSet["location_cd"], loc)
 		resultSet["year"] = append(resultSet["year"], yr)
-		resultSet["concept_cd"] = append(resultSet["concept_cd"], cpt)
+		resultSet["concept_path"] = append(resultSet["concept_path"], cpt)
 
 		//uncomment for deployed
 		//-------------------------------------------------------------------
@@ -384,7 +383,7 @@ func (s *Service) AggregateResultSet(resultSet *map[string][]string, counts *lib
 
 	}
 
-	//TODO: implement parallelized version (TO FIX: invalid memory address or nil pointer dereference )
+	//TODO: implement parallelized version
 	/*
 		wg := lib.StartParallelize(len(*counts))
 		mutexD := sync.Mutex{}
@@ -417,7 +416,7 @@ func (s *Service) AggregateResultSet(resultSet *map[string][]string, counts *lib
 	return &aggregatedResultSet
 }
 
-func (s *Service) PrepareQueryStatement() string {
+func (s *Service) PrepareQueryStatement(exactPath bool) string {
 
 	// select statement
 	selectStmt := "SELECT * "
@@ -428,17 +427,23 @@ func (s *Service) PrepareQueryStatement() string {
 	// where statement
 	whereStmt := " WHERE "
 
-	conceptCodes := ""
+	conceptPaths := ""
 	if len(s.Query.Concepts) > 0 {
-		conceptCodes += "("
-		for i, cd := range s.Query.Concepts {
-			conceptCodes += "concept_cd="
-			conceptCodes += "'" + cd + "'"
+		conceptPaths += "("
+		for i, path := range s.Query.Concepts {
+			if(exactPath){
+				conceptPaths += "concept_path="
+				conceptPaths += "'" + doubleBackSlashes(path) + "'"
+			}else{
+				conceptPaths += "concept_path LIKE"
+				conceptPaths += "'%" + doubleBackSlashes(path) + "%'"
+			}
+			
 			if i < len(s.Query.Concepts)-1 {
-				conceptCodes += " OR "
+				conceptPaths += " OR "
 			}
 		}
-		conceptCodes += ")"
+		conceptPaths += ")"
 	}
 
 	times := ""
@@ -475,7 +480,7 @@ func (s *Service) PrepareQueryStatement() string {
 		locationCodes += ")"
 	}
 
-	whereStmt += conceptCodes + times + locationCodes
+	whereStmt += conceptPaths + times + locationCodes
 
 	//order by statement (optional)
 	orderByStmt := " ORDER BY location_cd ASC;"
@@ -484,4 +489,9 @@ func (s *Service) PrepareQueryStatement() string {
 	queryStmt := selectStmt + fromStmt + whereStmt + orderByStmt
 
 	return queryStmt
+}
+
+func doubleBackSlashes(text string) string{
+	temp := strings.Replace(text,"\\\\i2b2_DIAG","",1)
+	return strings.Replace(temp,"\\","\\\\",-1)
 }

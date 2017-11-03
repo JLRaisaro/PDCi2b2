@@ -38,8 +38,13 @@ func startQuery(servers *onet.Roster, locations, times, concepts, groupBy []stri
 	}
 	end := time.Since(start)
 
+	if(grps==nil || aggr==nil){
+		log.Lvl1("Query results are empty. Not writing them in ",out)
+		return
+	}
+
 	// print output
-	log.Lvl1(client, "outputs query resuls: ", *grps, *aggr)
+	log.Lvl1(client, "outputs query results: ", *grps, *aggr)
 
 	// save output in Csv file
 	// print output

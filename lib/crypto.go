@@ -533,6 +533,15 @@ func (c *CipherText) Serialize() string {
 	return base64.StdEncoding.EncodeToString((*c).ToBytes())
 }
 
+// Serialize encodes a CipherVector in an array of base64 strings
+func (cv *CipherVector) Serialize() []string {
+	var res []string
+	for _,c := range(*cv){
+		res = append(res,c.Serialize())
+	}
+	return res
+}
+
 // Deserialize decodes a CipherText from a base64 string
 func (c *CipherText) Deserialize(b64Encoded string) error {
 	decoded, err := base64.StdEncoding.DecodeString(b64Encoded)

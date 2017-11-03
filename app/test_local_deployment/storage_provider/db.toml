@@ -1,4 +1,4 @@
 Username = "i2b2demodata"
 Password = "i2b2demodata"
-DbName = "i2b2demodata"
-Table = "public.demo_data_encrypted"
+DbName = "i2b2"
+Table = "i2b2demodata.demo_data_encryptedv2"

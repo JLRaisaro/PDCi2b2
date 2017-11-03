@@ -40,6 +40,11 @@ const (
 	optionGroupBy      = "groupBy"
 	optionGroupByShort = "g"
 
+	// connector flags
+
+	address 			 = "address"
+	addressShort 		 = "a"
+
 	// decryption flags
 
 	optionDecryptKey      = "key"
@@ -143,11 +148,23 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  optionGroupBy + ", " + optionGroupByShort,
-			Usage: "Specify the attributes in the SQL-GROUPBY clause. Possible values: 'location_cd', 'concept_cd', 'time'",
+			Usage: "Specify the attributes in the SQL-GROUPBY clause. Possible values: 'location_cd', 'concept_path', 'time'",
 		},
 		cli.StringFlag{
 			Name:  optionCsvFileOut + ", " + optionCsvFileOutShort,
 			Usage: "Specify the output csv `FILE`",
+		},
+	}
+
+	connectorFlags :=[]cli.Flag{
+		cli.StringFlag{
+			Name:  address + ", " + addressShort,
+			Usage: "Address of the server",
+		},
+		cli.StringFlag{
+			Name:  optionGroupFile + ", " + optionGroupFileShort,
+			Value: DefaultGroupFile,
+			Usage: "Servers' definition `FILE`",
 		},
 	}
 
@@ -218,6 +235,16 @@ func main() {
 			Flags:   queryFlags,
 		},
 		// CLIENT END: QUERIER ----------
+
+		//BEGIN I2B2CONNECTOR ------------
+		{
+			Name:    "connecti2b2",
+			Aliases: []string{"cib"},
+			Usage:   "Connects i2b2 crypto cell with the backend crypto engine",
+			Action:  webServer,
+			Flags:   connectorFlags,
+		},
+		//I2B2CONNECTOR END -----------	
 
 		// BEGIN SERVER --------
 		{
