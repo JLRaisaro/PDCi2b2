@@ -73,6 +73,7 @@ func (state State) totalNumHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body,&pathsObj)
 	paths := pathsObj["conceptpaths"].([]interface{})
 	keyString := pathsObj["clientpublickey"].(string)
+	fmt.Println("received ",len(paths)," paths")
 	fmt.Println("totalNum received public key : ",keyString)
 	if(len(paths)>0){
 
@@ -85,10 +86,18 @@ func (state State) totalNumHandler(w http.ResponseWriter, r *http.Request) {
 
 		var results []Result
 		for _,path := range paths{
-			results = append(results, queryAggr(path.(string),client,el)...)
+			queryres := queryAggr(path.(string),client,el)
+			if(queryres!=nil){
+				results = append(results, queryres...)
+			}
 		}
 		
 		res := &Response{results}
+		fmt.Println("response : ",*res)
+		resJson,_ := json.Marshal(res)
+		w.Write(resJson)
+	}else{
+		res := &Response{nil}
 		resJson,_ := json.Marshal(res)
 		w.Write(resJson)
 	}
@@ -125,11 +134,13 @@ func (state State) totalNumsHandler(w http.ResponseWriter, r *http.Request) {
 func queryAggr(path string, client  *serviceI2B2dc.APIremote, el *onet.Roster) []Result{
 	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{}, []string{}, []string{path}, []string{})
 	if err != nil {
-		log.Fatal("Service did not start.", err)
+		fmt.Println("Service did not start.", err)
+		return nil
 	}
 	grps, aggr, err := client.ExecuteQuery(*queryID)
 	if err != nil {
-		log.Fatal("Query could not be executed.", err)
+		fmt.Println("Query could not be executed.", err)
+		return nil
 	}
 	var results []Result
 	if(grps!=nil && aggr!=nil){
@@ -150,12 +161,14 @@ func queryGroupBy(path string, client  *serviceI2B2dc.APIremote, el *onet.Roster
 	groupBy = append(groupBy, "year")
 	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{}, []string{}, []string{path}, groupBy)
 	if err != nil {
-		log.Fatal("Service did not start.", err)
+		fmt.Println("Service did not start.", err)
+		return nil
 	}
 
 	grps, aggr, err := client.ExecuteQuery(*queryID)
 	if err != nil {
-		log.Fatal("Query could not be executed.", err)
+		fmt.Println("Query could not be executed.", err)
+		return nil
 	}
 	var results []ResultGroup
 	if(grps!=nil && aggr!=nil){

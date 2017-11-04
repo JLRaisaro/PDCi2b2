@@ -129,7 +129,6 @@ func (s *Service) HandleCreationQueryDC(recq *CreationQueryDC) (network.Message,
 	if recq.QueryID == "" {
 		newID := QueryID(uuid.NewV4().String())
 		recq.QueryID = newID
-		//TODO: add checks on input to avoid SQL injections (regex)
 
 		log.Lvl1(s.ServerIdentity().String(), " sends back confirmation to the client for query with ID: ", recq.QueryID)
 
@@ -427,53 +426,56 @@ func (s *Service) PrepareQueryStatement(exactPath bool) string {
 	// where statement
 	whereStmt := " WHERE "
 
+	conceptsInput := escapeAllAgainstSQLi(s.Query.Concepts)
 	conceptPaths := ""
-	if len(s.Query.Concepts) > 0 {
+	if len(conceptsInput) > 0 {
 		conceptPaths += "("
-		for i, path := range s.Query.Concepts {
+		for i, path := range conceptsInput {
 			if(exactPath){
 				conceptPaths += "concept_path="
-				conceptPaths += "'" + doubleBackSlashes(path) + "'"
+				conceptPaths += "'" + doubleBackSlashesAndSingleQuotes(path) + "'"
 			}else{
 				conceptPaths += "concept_path LIKE"
-				conceptPaths += "'%" + doubleBackSlashes(path) + "%'"
+				conceptPaths += "'%" + doubleBackSlashesAndSingleQuotes(path) + "%'"
 			}
 			
-			if i < len(s.Query.Concepts)-1 {
+			if i < len(conceptsInput)-1 {
 				conceptPaths += " OR "
 			}
 		}
 		conceptPaths += ")"
 	}
 
+	timesInput := escapeAllAgainstSQLi(s.Query.Times)
 	times := ""
-	if len(s.Query.Times) > 0 {
-		if len(s.Query.Concepts) > 0 {
+	if len(timesInput) > 0 {
+		if len(conceptsInput) > 0 {
 			times += " AND ("
 		} else {
 			times += "("
 		}
-		for i, tm := range s.Query.Times {
+		for i, tm := range timesInput {
 			times += "time LIKE"
 			times += " '" + tm + "%'"
-			if i < len(s.Query.Times)-1 {
+			if i < len(timesInput)-1 {
 				times += " OR "
 			}
 		}
 		times += ")"
 	}
 
+	locationsInput := escapeAllAgainstSQLi(s.Query.Locations)
 	locationCodes := ""
-	if len(s.Query.Locations) > 0 {
-		if len(s.Query.Concepts) > 0 || len(s.Query.Times) > 0 {
+	if len(locationsInput) > 0 {
+		if len(conceptsInput) > 0 || len(timesInput) > 0 {
 			locationCodes += " AND ( "
 		} else {
 			locationCodes += "("
 		}
-		for i, loc := range s.Query.Locations {
+		for i, loc := range locationsInput {
 			locationCodes += "location_cd="
 			locationCodes += "'" + loc + "'"
-			if i < len(s.Query.Locations)-1 {
+			if i < len(locationsInput)-1 {
 				locationCodes += " OR "
 			}
 		}
@@ -491,7 +493,30 @@ func (s *Service) PrepareQueryStatement(exactPath bool) string {
 	return queryStmt
 }
 
-func doubleBackSlashes(text string) string{
+/*
+Escapes characters that might be present in the oncpet path
+*/
+func doubleBackSlashesAndSingleQuotes(text string) string{
 	temp := strings.Replace(text,"\\\\i2b2_DIAG","",1)
-	return strings.Replace(temp,"\\","\\\\",-1)
+	temp2 := strings.Replace(temp,"\\","\\\\",-1)
+	return strings.Replace(temp2,"'","''",-1)
+}
+/*
+Escapes characters that may be used for SQL injections.
+This is not a good solution but currently (go 1.9) it
+seems like  db.Query or db.Exec don't handle prepared statements with slices.
+*/
+func escapeAgainstSQLi(text string) string{
+	text = strings.Replace(text,"\"","\\\"",-1)
+	text = strings.Replace(text,";","",-1)
+	text = strings.Replace(text,"%","",-1)
+	return text
+}
+
+func escapeAllAgainstSQLi(texts []string) []string{
+	var res []string
+	for _,t := range texts{
+		res = append(res,escapeAgainstSQLi(t))
+	}
+	return res
 }
