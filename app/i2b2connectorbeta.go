@@ -64,6 +64,7 @@ This handler finds the total num for each of the concept paths given as input, n
 The results are aggregated to return 1 encrypted total num per concept path.
 */
 func (state State) totalNumHandler(w http.ResponseWriter, r *http.Request) {
+	start0 := time.Now()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	body, err1 := ioutil.ReadAll(r.Body)
 	if(err1!=nil){
@@ -85,8 +86,12 @@ func (state State) totalNumHandler(w http.ResponseWriter, r *http.Request) {
 		client := serviceI2B2dc.NewClientFromKey(el.List[0], strconv.Itoa(0), keyString, false)
 
 		var results []Result
+		resultsChannel := make(chan []Result, len(paths))
 		for _,path := range paths{
-			queryres := queryAggr(path.(string),client,el)
+			go queryAggr(resultsChannel ,path.(string),client,el)
+		}
+		for range paths{
+			queryres := <-resultsChannel
 			if(queryres!=nil){
 				results = append(results, queryres...)
 			}
@@ -101,6 +106,7 @@ func (state State) totalNumHandler(w http.ResponseWriter, r *http.Request) {
 		resJson,_ := json.Marshal(res)
 		w.Write(resJson)
 	}
+	fmt.Println("Handler time: ", time.Since(start0))
 }
 /*
 This handler finds the total nums for a given concept path according to location and time. It returns 2 lists of encrypted
@@ -131,7 +137,7 @@ func (state State) totalNumsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resJson)
 }
 
-func queryAggr(path string, client  *serviceI2B2dc.APIremote, el *onet.Roster) []Result{
+func queryAggr(resch chan []Result, path string, client  *serviceI2B2dc.APIremote, el *onet.Roster) []Result{
 	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{}, []string{}, []string{path}, []string{})
 	if err != nil {
 		fmt.Println("Service did not start.", err)
@@ -152,6 +158,7 @@ func queryAggr(path string, client  *serviceI2B2dc.APIremote, el *onet.Roster) [
 	}else{
 		results = append(results, Result{path, (*aggr)[0]})
 	}
+	resch <- results
 	return results
 }
 
