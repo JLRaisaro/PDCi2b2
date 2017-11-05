@@ -83,11 +83,12 @@ func (state State) totalNumHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal("Could not open group toml file.",err)
 		}
 
-		client := serviceI2B2dc.NewClientFromKey(el.List[0], strconv.Itoa(0), keyString, false)
+		
 
 		var results []Result
 		resultsChannel := make(chan []Result, len(paths))
-		for _,path := range paths{
+		for i,path := range paths{
+			client := serviceI2B2dc.NewClientFromKey(el.List[0], strconv.Itoa(i), keyString, false)
 			go queryAggr(resultsChannel ,path.(string),client,el)
 		}
 		for range paths{
@@ -143,6 +144,7 @@ func queryAggr(resch chan []Result, path string, client  *serviceI2B2dc.APIremot
 		fmt.Println("Service did not start.", err)
 		return nil
 	}
+	fmt.Println("at time : ", time.Now())
 	grps, aggr, err := client.ExecuteQuery(*queryID)
 	if err != nil {
 		fmt.Println("Query could not be executed.", err)

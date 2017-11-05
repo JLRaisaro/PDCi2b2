@@ -93,6 +93,7 @@ func (c *API) SendQuery(entities *onet.Roster, queryID QueryID, clientPubKey abs
 // SendResultsQuery to get the result from associated server and decrypt the response using its private key.
 func (c *API) ExecuteQuery(queryID QueryID) (*[]string, *[]int64, error) {
 	log.Lvl1(c, " asks the server to run the query with ID: ", queryID)
+	log.Lvl1(c, " api execute at time : ", time.Now())
 	resp := ServiceResult{}
 	err := c.SendProtobuf(c.entryPoint, &ResultsQueryDC{false, queryID, c.public}, &resp)
 	if err != nil {

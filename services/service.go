@@ -14,6 +14,7 @@ import (
 	"gopkg.in/dedis/onet.v1"
 	"gopkg.in/dedis/onet.v1/log"
 	"gopkg.in/dedis/onet.v1/network"
+	"sync"
 )
 
 // ServiceName is the registered name for the unlynx service.
@@ -71,6 +72,14 @@ type ServiceResult struct {
 // Service defines a service in i2b2dc.
 type Service struct {
 	*onet.ServiceProcessor
+	Query                        CreationQueryDC
+	AggregatedResults            []lib.FilteredResponse
+	KeySwitchedAggregatedResults []lib.FilteredResponse
+	Groups                       []string
+	QueriesStates				 sync.Map
+}
+
+type ServiceQueryState struct{
 	Query                        CreationQueryDC
 	AggregatedResults            []lib.FilteredResponse
 	KeySwitchedAggregatedResults []lib.FilteredResponse
@@ -135,27 +144,33 @@ func (s *Service) HandleCreationQueryDC(recq *CreationQueryDC) (network.Message,
 	}
 
 	// save the input query in the current service
-	s.Query = *recq
+	s.putQueryState(recq.QueryID)
+	queryState := s.getQueryState(recq.QueryID)
+	queryState.Query = *recq
 	// initialize results containers
-	s.AggregatedResults = make([]lib.FilteredResponse, 0, 0)
-	s.KeySwitchedAggregatedResults = make([]lib.FilteredResponse, 0, 0)
-	s.Groups = make([]string, 0, 0)
+	queryState.AggregatedResults = make([]lib.FilteredResponse, 0, 0)
+	queryState.KeySwitchedAggregatedResults = make([]lib.FilteredResponse, 0, 0)
+	queryState.Groups = make([]string, 0, 0)
 
-	return &ServiceState{s.Query.QueryID}, nil
+	return &ServiceState{queryState.Query.QueryID}, nil
 }
 
 // HandleSurveyResultsQuery handles the survey result query by the surveyor.
 func (s *Service) HandleResultsQueryDC(resq *ResultsQueryDC) (network.Message, onet.ClientError) {
 
 	log.Lvl1(s.ServerIdentity(), " receives an execution request for query with ID: ", resq.QueryID)
+	log.Lvl1(s.ServerIdentity(), " at time: ", time.Now())
 
-	s.Query.ClientPubKey = resq.ClientPublic
+	queryState := s.getQueryState(resq.QueryID)
 
-	s.StartService(resq.QueryID, true, false)
+	queryState.Query.ClientPubKey = resq.ClientPublic
+
+	s.StartService(queryState, true, false)
 
 	log.Lvl1(s.ServerIdentity(), " sends result back to the client")
+	log.Lvl1(s.ServerIdentity(), " at time: ", time.Now())
 
-	return &ServiceResult{Results: &s.KeySwitchedAggregatedResults, Groups: &s.Groups}, nil
+	return &ServiceResult{Results: &queryState.KeySwitchedAggregatedResults, Groups: &queryState.Groups}, nil
 
 }
 
@@ -169,6 +184,9 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 	var pi onet.ProtocolInstance
 	var err error
 
+	targetQuery := QueryID(string(conf.Data))
+	queryState := s.getQueryState(targetQuery)
+
 	switch tn.ProtocolName() {
 	case protocols.KeySwitchingProtocolName:
 		pi, err = protocols.NewKeySwitchingProtocol(tn)
@@ -179,8 +197,8 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 		keySwitch := pi.(*protocols.KeySwitchingProtocol)
 		if tn.IsRoot() {
 
-			keySwitch.TargetOfSwitch = &s.AggregatedResults
-			keySwitch.TargetPublicKey = &s.Query.ClientPubKey
+			keySwitch.TargetOfSwitch = &queryState.AggregatedResults
+			keySwitch.TargetPublicKey = &queryState.Query.ClientPubKey
 		}
 	default:
 		return nil, errors.New("Service attempts to start an unknown protocol: " + tn.ProtocolName() + ".")
@@ -190,14 +208,13 @@ func (s *Service) NewProtocol(tn *onet.TreeNodeInstance, conf *onet.GenericConfi
 }
 
 // StartProtocol starts a specific protocol (Pipeline, Shuffling, etc.)
-func (s *Service) StartProtocol(name string) (onet.ProtocolInstance, error) {
-
-	tree := s.Query.Roster.GenerateNaryTreeWithRoot(2, s.ServerIdentity())
+func (s *Service) StartProtocol(queryState *ServiceQueryState, name string) (onet.ProtocolInstance, error) {
+	tree := queryState.Query.Roster.GenerateNaryTreeWithRoot(2, s.ServerIdentity())
 
 	var tn *onet.TreeNodeInstance
 	tn = s.NewTreeNodeInstance(tree, tree.Root, name)
 
-	conf := onet.GenericConfig{Data: []byte(string(s.Query.QueryID))}
+	conf := onet.GenericConfig{Data: []byte(string(queryState.Query.QueryID))}
 
 	pi, err := s.NewProtocol(tn, &conf)
 	if err != nil {
@@ -215,9 +232,9 @@ func (s *Service) StartProtocol(name string) (onet.ProtocolInstance, error) {
 //______________________________________________________________________________________________________________________
 
 // StartService starts the service (with all its different steps/protocols)
-func (s *Service) StartService(targetQuery QueryID, root bool, exactPath bool) error {
+func (s *Service) StartService(queryState *ServiceQueryState, root bool, exactPath bool) error {
 
-	log.Lvl1(s.ServerIdentity(), " starts  Protocol for query ", targetQuery)
+	log.Lvl1(s.ServerIdentity(), " starts  Protocol for query ", queryState.Query.QueryID)
 
 	//get DB configuration
 	if _, err := toml.DecodeFile("db.toml", &dbConfig); err != nil {
@@ -225,26 +242,26 @@ func (s *Service) StartService(targetQuery QueryID, root bool, exactPath bool) e
 	}
 
 	//prepare SQL query statement
-	queryStmt := s.PrepareQueryStatement(exactPath)
+	queryStmt := s.PrepareQueryStatement(queryState, exactPath)
 
 	//execute query to DB along with aggregation
 	start0 := time.Now()
-	resultSet, counts := s.ExecuteSqlQuery(&queryStmt)
+	resultSet, counts := s.ExecuteSqlQuery(queryState, &queryStmt)
 	log.LLvl1("SQL Query Time: ", time.Since(start0))
 
 	//perform aggregation
 	start1 := time.Now()
-	aggregatedResultSet := s.AggregateResultSet(resultSet, counts)
+	aggregatedResultSet := s.AggregateResultSet(queryState, resultSet, counts)
 	log.LLvl1("Aggregation Time: ", time.Since(start1))
 
 	//TODO: add obfuscation for differential privacy
 
 	//copy aggregatedResultSet groups in list of string and aggregated counts in a CipherVector
-	s.AggregatedResults = append(s.AggregatedResults, lib.NewFilteredResponse(0, 0))
+	queryState.AggregatedResults = append(s.AggregatedResults, lib.NewFilteredResponse(0, 0))
 
 	for key := range *aggregatedResultSet {
-		s.Groups = append(s.Groups, key)
-		s.AggregatedResults[0].AggregatingAttributes = append(s.AggregatedResults[0].AggregatingAttributes, *((*aggregatedResultSet)[key]))
+		queryState.Groups = append(queryState.Groups, key)
+		queryState.AggregatedResults[0].AggregatingAttributes = append(queryState.AggregatedResults[0].AggregatingAttributes, *((*aggregatedResultSet)[key]))
 
 	}
 
@@ -255,7 +272,7 @@ func (s *Service) StartService(targetQuery QueryID, root bool, exactPath bool) e
 	if root == true {
 		start := lib.StartTimer(s.ServerIdentity().String() + "_KeySwitchingPhase")
 
-		s.KeySwitchingPhase()
+		s.KeySwitchingPhase(queryState)
 
 		lib.EndTimer(start)
 	}
@@ -265,20 +282,19 @@ func (s *Service) StartService(targetQuery QueryID, root bool, exactPath bool) e
 }
 
 // KeySwitchingPhase performs the switch to the querier's key on the currently aggregated data.
-func (s *Service) KeySwitchingPhase() error {
-	pi, err := s.StartProtocol(protocols.KeySwitchingProtocolName)
+func (s *Service) KeySwitchingPhase(queryState *ServiceQueryState) error {
+	pi, err := s.StartProtocol(queryState, protocols.KeySwitchingProtocolName)
 	if err != nil {
 		return err
 	}
-
-	s.KeySwitchedAggregatedResults = <-pi.(*protocols.KeySwitchingProtocol).FeedbackChannel
+	queryState.KeySwitchedAggregatedResults = <-pi.(*protocols.KeySwitchingProtocol).FeedbackChannel
 
 	return err
 }
 
 // Query and DB management
 //______________________________________________________________________________________________________________________
-func (s *Service) ExecuteSqlQuery(query *string) (*map[string][]string, *lib.CipherVector) {
+func (s *Service) ExecuteSqlQuery(queryState *ServiceQueryState, query *string) (*map[string][]string, *lib.CipherVector) {
 
 	// open connection to DB
 	db, err := sql.Open("postgres", "user="+dbConfig.Username+" password="+dbConfig.Password+" dbname="+dbConfig.DbName+" sslmode=disable")
@@ -352,20 +368,22 @@ func (s *Service) ExecuteSqlQuery(query *string) (*map[string][]string, *lib.Cip
 
 }
 
-func (s *Service) AggregateResultSet(resultSet *map[string][]string, counts *lib.CipherVector) *map[string]*lib.CipherText {
+func (s *Service) AggregateResultSet(queryState *ServiceQueryState, resultSet *map[string][]string, counts *lib.CipherVector) *map[string]*lib.CipherText {
 
 	log.Lvl1(s.ServerIdentity(), " performs result aggregation of the resultSet")
 	aggregatedResultSet := make(map[string]*lib.CipherText)
+
+	query := queryState.Query
 
 	//from the resultSet map create a new map where keys are group identifiers (specified in the initial query)
 	//and values are the summations of counts in the same group
 	for i := 0; i < len(*counts); i++ {
 
 		key := ""
-		if len(s.Query.GroupBy) > 0 {
-			for j, gr := range s.Query.GroupBy {
+		if len(query.GroupBy) > 0 {
+			for j, gr := range query.GroupBy {
 				key += (*resultSet)[gr][i]
-				if j < len(s.Query.GroupBy)-1 {
+				if j < len(query.GroupBy)-1 {
 					key += ","
 				}
 
@@ -415,7 +433,7 @@ func (s *Service) AggregateResultSet(resultSet *map[string][]string, counts *lib
 	return &aggregatedResultSet
 }
 
-func (s *Service) PrepareQueryStatement(exactPath bool) string {
+func (s *Service) PrepareQueryStatement(queryState *ServiceQueryState, exactPath bool) string {
 
 	// select statement
 	selectStmt := "SELECT * "
@@ -426,7 +444,8 @@ func (s *Service) PrepareQueryStatement(exactPath bool) string {
 	// where statement
 	whereStmt := " WHERE "
 
-	conceptsInput := escapeAllAgainstSQLi(s.Query.Concepts)
+	query := queryState.Query
+	conceptsInput := escapeAllAgainstSQLi(query.Concepts)
 	conceptPaths := ""
 	if len(conceptsInput) > 0 {
 		conceptPaths += "("
@@ -446,7 +465,7 @@ func (s *Service) PrepareQueryStatement(exactPath bool) string {
 		conceptPaths += ")"
 	}
 
-	timesInput := escapeAllAgainstSQLi(s.Query.Times)
+	timesInput := escapeAllAgainstSQLi(query.Times)
 	times := ""
 	if len(timesInput) > 0 {
 		if len(conceptsInput) > 0 {
@@ -464,7 +483,7 @@ func (s *Service) PrepareQueryStatement(exactPath bool) string {
 		times += ")"
 	}
 
-	locationsInput := escapeAllAgainstSQLi(s.Query.Locations)
+	locationsInput := escapeAllAgainstSQLi(query.Locations)
 	locationCodes := ""
 	if len(locationsInput) > 0 {
 		if len(conceptsInput) > 0 || len(timesInput) > 0 {
@@ -519,4 +538,17 @@ func escapeAllAgainstSQLi(texts []string) []string{
 		res = append(res,escapeAgainstSQLi(t))
 	}
 	return res
+}
+
+func (s *Service) getQueryState(targetQuery QueryID) *ServiceQueryState{
+	res,ok := s.QueriesStates.Load(targetQuery)
+	if(ok){
+		return res.(*ServiceQueryState)
+	}else{
+		return nil
+	}
+}
+
+func (s *Service) putQueryState(targetQuery QueryID){
+	s.QueriesStates.Store(targetQuery, &ServiceQueryState{})
 }
