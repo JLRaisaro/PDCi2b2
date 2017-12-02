@@ -34,6 +34,8 @@ type CreationQueryDC struct {
 	Times     []string
 	Concepts  []string
 	GroupBy   []string
+	FromTime  string
+	ToTime    string
 }
 
 // MsgTypes defines the Message Type ID for all the service's intra-messages.
@@ -502,6 +504,13 @@ func (s *Service) PrepareQueryStatement(queryState *ServiceQueryState, exactPath
 	}
 
 	whereStmt += conceptPaths + times + locationCodes
+
+	if(query.FromTime!=""){
+		whereStmt += " AND time >= '"+query.FromTime+"'"
+	}
+	if(query.ToTime!=""){
+		whereStmt += " AND time <= '"+query.ToTime+"'"
+	}
 
 	//order by statement (optional)
 	orderByStmt := " ORDER BY location_cd ASC;"

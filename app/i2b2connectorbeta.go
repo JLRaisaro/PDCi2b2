@@ -123,8 +123,13 @@ func (state State) totalNumsHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body,&pathObj)
 	path := pathObj["conceptpath"].(string)
 	keyString := pathObj["clientpublickey"].(string)
+	from := pathObj["fromtime"].(string)
+	to := pathObj["totime"].(string)
+	distribution := pathObj["distribution"].(string)
 	fmt.Println("totalNums received path : ",path)
 	fmt.Println("and public key : ",keyString)
+	fmt.Println("with time frame : ",from,"-",to)
+	fmt.Println(distribution+" distribution")
 
 	el, err := openGroupToml(state.group)
 	if err != nil {
@@ -132,14 +137,21 @@ func (state State) totalNumsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	client := serviceI2B2dc.NewClientFromKey(el.List[0], strconv.Itoa(0), keyString, false)
 
-	results := queryGroupBy(path,client,el)
+	var groupBy []string
+	groupBy = append(groupBy, "location_cd")
+	if(distribution=="point"){//otherwise it is "cumulative". this way we return either the evolution over time or the aggregation.
+		groupBy = append(groupBy, "year")
+	}
+	
+	results := queryGroupBy(path,client,el,from,to, groupBy)
 	res := &ResponseGroup{results}
 	resJson,_ := json.Marshal(res)
 	w.Write(resJson)
 }
 
 func queryAggr(resch chan []Result, path string, client  *serviceI2B2dc.APIremote, el *onet.Roster) []Result{
-	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{}, []string{}, []string{path}, []string{})
+	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{},
+		[]string{}, []string{path}, []string{},"","")
 	if err != nil {
 		fmt.Println("Service did not start.", err)
 		return nil
@@ -164,11 +176,8 @@ func queryAggr(resch chan []Result, path string, client  *serviceI2B2dc.APIremot
 	return results
 }
 
-func queryGroupBy(path string, client  *serviceI2B2dc.APIremote, el *onet.Roster) []ResultGroup{
-	var groupBy []string
-	groupBy = append(groupBy, "location_cd")
-	groupBy = append(groupBy, "year")
-	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{}, []string{}, []string{path}, groupBy)
+func queryGroupBy(path string, client  *serviceI2B2dc.APIremote, el *onet.Roster, from string, to string, groupBy []string) []ResultGroup{
+	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{}, []string{}, []string{path}, groupBy, from, to)
 	if err != nil {
 		fmt.Println("Service did not start.", err)
 		return nil
