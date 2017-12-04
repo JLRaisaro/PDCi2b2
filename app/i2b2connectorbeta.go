@@ -12,6 +12,7 @@ import(
 	"strconv"
 	"github.com/JLRgithub/PrivateDCi2b2/services"
 	"gopkg.in/dedis/onet.v1"
+	"strings"
 )
 
 type State struct{
@@ -22,8 +23,19 @@ type State struct{
 func webServer(c *cli.Context){
 	r := mux.NewRouter()
 	address := ""
-	if a := c.String("address"); a != "" {
-		address = a
+	if aFile := c.String("address"); aFile != "" {
+		data, err := ioutil.ReadFile(aFile)
+		if(err!=nil){
+			panic(err)
+		}
+		dataStr := string(data)
+		addressLineIndex := strings.Index(dataStr,"Address=\"")
+		addressBegin := addressLineIndex+len("Address=\"")
+		addressEnd := addressBegin+1
+		for dataStr[addressEnd]!='"'{
+			addressEnd = addressEnd+1
+		}
+		address = dataStr[addressBegin:addressEnd]
 	}
 	group := ""
 	if g := c.String("file"); g != "" {
