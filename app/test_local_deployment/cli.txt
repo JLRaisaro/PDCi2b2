@@ -1,3 +1,3 @@
 ./../../PDCi2b2 -d 1 server -c private.toml
 
-./../PDCi2b2 -d 1 cib -f group.toml -a 127.0.0.1:7500
+./../PDCi2b2 -d 1 cib -f group.toml -a private.toml

@@ -36,6 +36,7 @@ type CreationQueryDC struct {
 	GroupBy   []string
 	FromTime  string
 	ToTime    string
+	Noisy     bool
 }
 
 // MsgTypes defines the Message Type ID for all the service's intra-messages.
@@ -438,8 +439,16 @@ func (s *Service) AggregateResultSet(queryState *ServiceQueryState, resultSet *m
 func (s *Service) PrepareQueryStatement(queryState *ServiceQueryState, exactPath bool) string {
 
 	// select statement
-	selectStmt := "SELECT * "
-
+	selectStmt := ""
+	if(!queryState.Query.Noisy){
+		selectStmt = "SELECT location_cd,time,concept_path,totalnum "
+	}else{
+		//TODO : to obfuscate the results, one possibility is to add a new column 'noisytotalnum' to the table
+		//and modify the following select statement accordingly.
+		//for now we simply query the same column since differential privacy will be done later.
+		selectStmt = "SELECT location_cd,time,concept_path,totalnum "
+	}
+	
 	// from statement
 	fromStmt := "FROM " + dbConfig.Table
 

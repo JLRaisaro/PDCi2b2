@@ -78,6 +78,7 @@ func (c *API) SendQuery(entities *onet.Roster, queryID QueryID, clientPubKey abs
 		Times:     time,
 		Concepts:  concepts,
 		GroupBy:   groupBy,
+		Noisy:     false,
 	}
 	resp := ServiceState{}
 	err := c.SendProtobuf(c.entryPoint, &cq, &resp)
@@ -121,7 +122,7 @@ func (c *API) String() string {
 
 // SendQuery creates a query based on a set of entities (servers) and a query description.
 func (c *APIremote) SendQuery(entities *onet.Roster, queryID QueryID, clientPubKey abstract.Point, 
-	locations, time, concepts, groupBy []string, from string, to string) (*QueryID, error) {
+	locations, time, concepts, groupBy []string, from string, to string, noisy bool) (*QueryID, error) {
 	log.Lvl1(c, " creates a query with input: location=", locations, "time=", time, "concept=", concepts, "groupBy=", groupBy)
 
 	var newQueryID QueryID
@@ -138,6 +139,7 @@ func (c *APIremote) SendQuery(entities *onet.Roster, queryID QueryID, clientPubK
 		GroupBy:   groupBy,
 		FromTime:  from,
 		ToTime:    to,
+		Noisy:     noisy,
 	}
 	resp := ServiceState{}
 	err := c.SendProtobuf(c.entryPoint, &cq, &resp)

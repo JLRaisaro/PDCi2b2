@@ -86,8 +86,14 @@ func (state State) totalNumHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body,&pathsObj)
 	paths := pathsObj["conceptpaths"].([]interface{})
 	keyString := pathsObj["clientpublickey"].(string)
+	noisy := pathsObj["noisy"].(bool)
 	fmt.Println("received ",len(paths)," paths")
 	fmt.Println("totalNum received public key : ",keyString)
+	if(noisy){
+		fmt.Println("The results will be obfuscated.")
+	}else{
+		fmt.Println("The exact results will be sent.")
+	}
 	if(len(paths)>0){
 
 		el, err := openGroupToml(state.group)
@@ -101,7 +107,7 @@ func (state State) totalNumHandler(w http.ResponseWriter, r *http.Request) {
 		resultsChannel := make(chan []Result, len(paths))
 		for i,path := range paths{
 			client := serviceI2B2dc.NewClientFromKey(el.List[0], strconv.Itoa(i), keyString, false)
-			go queryAggr(resultsChannel ,path.(string),client,el)
+			go queryAggr(resultsChannel, path.(string), client, el, noisy)
 		}
 		for range paths{
 			queryres := <-resultsChannel
@@ -137,11 +143,17 @@ func (state State) totalNumsHandler(w http.ResponseWriter, r *http.Request) {
 	keyString := pathObj["clientpublickey"].(string)
 	from := pathObj["fromtime"].(string)
 	to := pathObj["totime"].(string)
+	noisy := pathObj["noisy"].(bool)
 	distribution := pathObj["distribution"].(string)
 	fmt.Println("totalNums received path : ",path)
 	fmt.Println("and public key : ",keyString)
 	fmt.Println("with time frame : ",from,"-",to)
 	fmt.Println(distribution+" distribution")
+	if(noisy){
+		fmt.Println("The results will be obfuscated.")
+	}else{
+		fmt.Println("The exact results will be sent.")
+	}
 
 	el, err := openGroupToml(state.group)
 	if err != nil {
@@ -155,15 +167,15 @@ func (state State) totalNumsHandler(w http.ResponseWriter, r *http.Request) {
 		groupBy = append(groupBy, "year")
 	}
 	
-	results := queryGroupBy(path,client,el,from,to, groupBy)
+	results := queryGroupBy(path, client, el, from, to, groupBy, noisy)
 	res := &ResponseGroup{results}
 	resJson,_ := json.Marshal(res)
 	w.Write(resJson)
 }
 
-func queryAggr(resch chan []Result, path string, client  *serviceI2B2dc.APIremote, el *onet.Roster) []Result{
+func queryAggr(resch chan []Result, path string, client  *serviceI2B2dc.APIremote, el *onet.Roster, noisy bool) []Result{
 	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{},
-		[]string{}, []string{path}, []string{},"","")
+		[]string{}, []string{path}, []string{},"","", noisy)
 	if err != nil {
 		fmt.Println("Service did not start.", err)
 		return nil
@@ -188,8 +200,10 @@ func queryAggr(resch chan []Result, path string, client  *serviceI2B2dc.APIremot
 	return results
 }
 
-func queryGroupBy(path string, client  *serviceI2B2dc.APIremote, el *onet.Roster, from string, to string, groupBy []string) []ResultGroup{
-	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{}, []string{}, []string{path}, groupBy, from, to)
+func queryGroupBy(path string, client  *serviceI2B2dc.APIremote, el *onet.Roster, from string,
+	to string, groupBy []string,noisy bool) []ResultGroup{
+	queryID, err := client.SendQuery(el, serviceI2B2dc.QueryID(""), nil, []string{}, []string{},
+		[]string{path}, groupBy, from, to, noisy)
 	if err != nil {
 		fmt.Println("Service did not start.", err)
 		return nil
