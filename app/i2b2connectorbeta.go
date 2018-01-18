@@ -128,10 +128,11 @@ func (state State) totalNumHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Handler time: ", time.Since(start0))
 }
 /*
-This handler finds the total nums for a given concept path according to location and time. It returns 2 lists of encrypted
-total nums, 1 where the results are grouped by location, the other by time.
+This handler finds the total nums for a given concept path according to location and time. It returns a list of encrypted
+total nums grouped by location and time.
 */
 func (state State) totalNumsHandler(w http.ResponseWriter, r *http.Request) {
+	start0 := time.Now()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	body, err1 := ioutil.ReadAll(r.Body)
 	if(err1!=nil){
@@ -171,6 +172,7 @@ func (state State) totalNumsHandler(w http.ResponseWriter, r *http.Request) {
 	res := &ResponseGroup{results}
 	resJson,_ := json.Marshal(res)
 	w.Write(resJson)
+	fmt.Println("Handler time: ", time.Since(start0))
 }
 
 func queryAggr(resch chan []Result, path string, client  *serviceI2B2dc.APIremote, el *onet.Roster, noisy bool) []Result{
