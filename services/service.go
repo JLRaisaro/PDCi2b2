@@ -139,7 +139,8 @@ func (s *Service) HandleCreationQueryDC(recq *CreationQueryDC) (network.Message,
 
 	// if this server is the one receiving the query from the client
 	if recq.QueryID == "" {
-		newID := QueryID(uuid.NewV4().String())
+		u,_ := uuid.NewV4()
+		newID := QueryID(u.String())
 		recq.QueryID = newID
 
 		log.Lvl1(s.ServerIdentity().String(), " sends back confirmation to the client for query with ID: ", recq.QueryID)
