@@ -128,7 +128,8 @@ func (s *Service) HandleCreationQueryDC(recq *CreationQueryDC) (network.Message,
 
 	// if this server is the one receiving the query from the client
 	if recq.QueryID == "" {
-		newID := QueryID(uuid.NewV4().String())
+		u, _ := uuid.NewV4()
+		newID := QueryID(u.String())
 		recq.QueryID = newID
 		//TODO: add checks on input to avoid SQL injections (regex)
 
@@ -361,6 +362,8 @@ func (s *Service) AggregateResultSet(resultSet *map[string][]string, counts *lib
 
 	//from the resultSet map create a new map where keys are group identifiers (specified in the initial query)
 	//and values are the summations of counts in the same group
+
+	log.Lvl1(" Total number of records to aggregate: ", len(*counts))
 	for i := 0; i < len(*counts); i++ {
 
 		key := ""
